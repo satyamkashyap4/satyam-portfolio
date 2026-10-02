@@ -53,29 +53,28 @@ export default function Contact({ profile }) {
     }
   };
 
-  // Admin secret validation (PIN: 9525)
-  const handleVerifyPin = (e) => {
-    e.preventDefault();
-    if (pinInput === '9525' || pinInput === 'admin') {
+  const fetchContactMessages = async (keyToUse) => {
+    setLoadingMessages(true);
+    const key = keyToUse || pinInput;
+    try {
+      const response = await axios.get('/api/contact', {
+        headers: { 'x-admin-key': key }
+      });
+      setContactMessages(response.data);
       setPinError('');
       setShowPinModal(false);
       setShowAdminModal(true);
-      fetchContactMessages();
-    } else {
-      setPinError('Invalid Admin Access Code');
-    }
-  };
-
-  const fetchContactMessages = async () => {
-    setLoadingMessages(true);
-    try {
-      const response = await axios.get('/api/contact');
-      setContactMessages(response.data);
     } catch (err) {
       console.warn('Error fetching messages:', err);
+      setPinError('Invalid Admin Access Code');
     } finally {
       setLoadingMessages(false);
     }
+  };
+
+  const handleVerifyPin = (e) => {
+    e.preventDefault();
+    fetchContactMessages(pinInput);
   };
 
   return (
@@ -160,7 +159,7 @@ export default function Contact({ profile }) {
                   <span className="text-xs font-mono text-slate-400">Connect Across Platforms</span>
                   {/* Discreet Admin Lock Button */}
                   <button
-                    onClick={() => setShowPinModal(true)}
+                    onClick={() => { setPinInput(''); setPinError(''); setShowPinModal(true); }}
                     className="p-1 text-slate-600 hover:text-cyan-400 transition-colors"
                     title="Owner Messages Portal"
                   >
@@ -312,10 +311,10 @@ export default function Contact({ profile }) {
             </div>
             
             <p className="text-xs text-slate-400 font-mono">
-              Enter your PIN code (9525) to view received visitor contact table:
+              Enter Admin Access Code:
             </p>
 
-            {pinError && <div className="text-xs text-rose-400 font-mono">{pinError}</div>}
+            {pinError && <div className="text-xs text-rose-400 font-mono font-medium">{pinError}</div>}
 
             <form onSubmit={handleVerifyPin} className="space-y-3">
               <input
@@ -327,9 +326,17 @@ export default function Contact({ profile }) {
               />
               <button
                 type="submit"
-                className="w-full py-2.5 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs"
+                disabled={loadingMessages}
+                className="w-full py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs transition-colors flex items-center justify-center gap-2"
               >
-                Access Inbox Table
+                {loadingMessages ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></div>
+                    <span>Verifying Code...</span>
+                  </>
+                ) : (
+                  <span>Access Inbox Table</span>
+                )}
               </button>
             </form>
           </div>
@@ -355,7 +362,7 @@ export default function Contact({ profile }) {
 
               <div className="flex items-center gap-2">
                 <button
-                  onClick={fetchContactMessages}
+                  onClick={() => fetchContactMessages(pinInput)}
                   className="p-2 rounded-xl text-slate-400 hover:text-cyan-400 hover:bg-slate-800 transition-colors"
                   title="Refresh Table"
                 >

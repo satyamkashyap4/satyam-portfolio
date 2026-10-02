@@ -32,7 +32,6 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // In-memory fallback recording
     const savedMsg = { _id: 'c' + (inMemoryContacts.length + 1), ...contactPayload };
     inMemoryContacts.push(savedMsg);
 
@@ -48,9 +47,14 @@ router.post('/', async (req, res) => {
 });
 
 // @route   GET /api/contact
-// @desc    List contact messages (For admin review)
+// @desc    List contact messages (Protected for owner only with admin key)
 router.get('/', async (req, res) => {
   try {
+    const adminKey = req.headers['x-admin-key'] || req.query.key;
+    if (adminKey !== '9525' && adminKey !== 'admin') {
+      return res.status(401).json({ message: 'Unauthorized: Admin access key required.' });
+    }
+
     if (getIsConnectedToMongo()) {
       const messages = await Contact.find().sort({ createdAt: -1 });
       return res.json(messages);
