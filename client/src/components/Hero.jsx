@@ -4,6 +4,8 @@ import { ArrowRight, Download, Terminal, CheckCircle2, Sparkles, Code, Cpu, Data
 export default function Hero({ profile }) {
   const [activeTab, setActiveTab] = useState('developer');
 
+  const cvDriveUrl = "https://drive.google.com/file/d/1C2-GgLrfYBFV6CsNIvDqX3mYvzYR7Qku/view?pli=1";
+
   const codeSnippets = {
     developer: `// Satyam Babu Profile Configuration
 const developer = {
@@ -86,13 +88,13 @@ router.post('/api/predict', async (req, res) => {
               </a>
 
               <a
-                href="C:\Users\Bhuvan\.gemini\antigravity\scratch\cv.pdf"
+                href={cvDriveUrl}
                 target="_blank"
-                download="Satyam_Babu_CV.pdf"
+                rel="noreferrer"
                 className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl glass-card text-slate-200 font-semibold text-sm hover:text-cyan-400 transition-all duration-300"
               >
                 <Download className="w-4 h-4 text-cyan-400" />
-                <span>Download Resume</span>
+                <span>View & Download Resume</span>
               </a>
             </div>
 

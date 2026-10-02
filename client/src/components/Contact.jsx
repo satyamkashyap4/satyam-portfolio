@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Mail, Phone, MapPin, Send, CheckCircle2, AlertCircle, Linkedin, Github, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Mail, Phone, MapPin, Send, CheckCircle2, AlertCircle, Linkedin, Github, Sparkles, Inbox, RefreshCw, X, Calendar, User, FileText } from 'lucide-react';
 import axios from 'axios';
 
 export default function Contact({ profile }) {
@@ -11,6 +11,11 @@ export default function Contact({ profile }) {
   });
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState({ type: null, message: '' });
+
+  // Contact Messages Admin Modal State
+  const [showAdminModal, setShowAdminModal] = useState(false);
+  const [contactMessages, setContactMessages] = useState([]);
+  const [loadingMessages, setLoadingMessages] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -35,7 +40,6 @@ export default function Contact({ profile }) {
       setFormData({ name: '', email: '', subject: '', message: '' });
     } catch (err) {
       console.warn('Backend API submission note:', err);
-      // Fallback message display if offline
       setStatus({
         type: 'success',
         message: 'Message sent successfully! Satyam will respond to your email shortly.'
@@ -46,6 +50,23 @@ export default function Contact({ profile }) {
     }
   };
 
+  const fetchContactMessages = async () => {
+    setLoadingMessages(true);
+    try {
+      const response = await axios.get('/api/contact');
+      setContactMessages(response.data);
+    } catch (err) {
+      console.warn('Error fetching messages:', err);
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
+
+  const handleOpenAdminModal = () => {
+    setShowAdminModal(true);
+    fetchContactMessages();
+  };
+
   return (
     <section id="contact" className="py-24 relative bg-slate-950 border-t border-slate-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -53,7 +74,7 @@ export default function Contact({ profile }) {
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-400 text-xs font-mono font-medium">
-            <Mail className="w-3.5 h-3.5" /> Direct Contact
+            <Mail className="w-3.5 h-3.5" /> Direct Contact & Inquiries
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
             Get In <span className="gradient-text">Touch</span>
@@ -61,6 +82,17 @@ export default function Contact({ profile }) {
           <p className="text-slate-400 text-base leading-relaxed">
             Whether you have a software role, project opportunity, or question, feel free to send a direct message!
           </p>
+
+          {/* Admin Inbox Table Toggle */}
+          <div className="pt-2">
+            <button
+              onClick={handleOpenAdminModal}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-cyan-500/40 text-slate-300 hover:text-cyan-400 text-xs font-mono transition-all shadow-sm"
+            >
+              <Inbox className="w-4 h-4 text-cyan-400" />
+              <span>View Submitted Contact Table</span>
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
@@ -127,7 +159,7 @@ export default function Contact({ profile }) {
                 <div className="text-xs font-mono text-slate-400">Connect Across Platforms</div>
                 <div className="flex items-center gap-3">
                   <a
-                    href={profile?.socialLinks?.github || 'https://github.com/satyambabu'}
+                    href="https://github.com/satyamkashyap4"
                     target="_blank"
                     rel="noreferrer"
                     className="flex-1 flex items-center justify-center gap-2 p-3 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-200 text-xs font-semibold font-mono transition-colors"
@@ -135,7 +167,7 @@ export default function Contact({ profile }) {
                     <Github className="w-4 h-4 text-cyan-400" /> GitHub
                   </a>
                   <a
-                    href={profile?.socialLinks?.linkedin || 'https://linkedin.com/in/satyambabu'}
+                    href="https://linkedin.com/in/satyambabu"
                     target="_blank"
                     rel="noreferrer"
                     className="flex-1 flex items-center justify-center gap-2 p-3 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-200 text-xs font-semibold font-mono transition-colors"
@@ -253,7 +285,109 @@ export default function Contact({ profile }) {
           </div>
 
         </div>
+
       </div>
+
+      {/* Admin Contact Messages Table Modal */}
+      {showAdminModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-4xl glass-panel rounded-2xl border border-slate-700 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+            
+            {/* Modal Header */}
+            <div className="p-6 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-400">
+                  <Inbox className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Contact Messages Table</h3>
+                  <p className="text-xs text-slate-400 font-mono">Visitor inquiries saved in MongoDB database</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={fetchContactMessages}
+                  className="p-2 rounded-xl text-slate-400 hover:text-cyan-400 hover:bg-slate-800 transition-colors"
+                  title="Refresh Table"
+                >
+                  <RefreshCw className={`w-4 h-4 ${loadingMessages ? 'animate-spin' : ''}`} />
+                </button>
+                <button
+                  onClick={() => setShowAdminModal(false)}
+                  className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body: Contact Messages Table */}
+            <div className="p-6 overflow-y-auto">
+              {loadingMessages ? (
+                <div className="py-12 text-center text-slate-400 flex items-center justify-center gap-3 font-mono text-xs">
+                  <div className="w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+                  <span>Fetching Contact Submissions...</span>
+                </div>
+              ) : contactMessages.length === 0 ? (
+                <div className="py-12 text-center text-slate-400 space-y-2">
+                  <Inbox className="w-8 h-8 text-slate-600 mx-auto" />
+                  <div className="text-sm font-semibold text-slate-300">No contact messages received yet</div>
+                  <p className="text-xs text-slate-500 font-mono">Submissions from the contact form will populate this table live.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-800 bg-slate-900/60 font-mono text-cyan-400 uppercase tracking-wider">
+                        <th className="p-3">Date</th>
+                        <th className="p-3">Sender Name</th>
+                        <th className="p-3">Email Address</th>
+                        <th className="p-3">Subject</th>
+                        <th className="p-3">Message Details</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800/60 text-slate-300">
+                      {contactMessages.map((msg, idx) => (
+                        <tr key={msg._id || idx} className="hover:bg-slate-900/40 transition-colors">
+                          <td className="p-3 font-mono whitespace-nowrap text-slate-400">
+                            {new Date(msg.createdAt || Date.now()).toLocaleDateString()}
+                          </td>
+                          <td className="p-3 font-semibold text-white whitespace-nowrap">
+                            {msg.name}
+                          </td>
+                          <td className="p-3 font-mono text-cyan-400 whitespace-nowrap">
+                            <a href={`mailto:${msg.email}`} className="hover:underline">{msg.email}</a>
+                          </td>
+                          <td className="p-3 font-medium text-slate-200">
+                            {msg.subject || 'Portfolio Inquiry'}
+                          </td>
+                          <td className="p-3 max-w-xs leading-relaxed text-slate-300">
+                            {msg.message}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 bg-slate-900/90 border-t border-slate-800 flex items-center justify-between text-xs font-mono text-slate-400">
+              <span>Total Messages: {contactMessages.length}</span>
+              <button
+                onClick={() => setShowAdminModal(false)}
+                className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors"
+              >
+                Close Table
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </section>
   );
 }
