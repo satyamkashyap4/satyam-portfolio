@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Mail, Phone, MapPin, Send, CheckCircle2, AlertCircle, Linkedin, Github, Sparkles, Inbox, RefreshCw, X, Calendar, User, FileText } from 'lucide-react';
+import React, { useState } from 'react';
+import { Mail, Phone, MapPin, Send, CheckCircle2, AlertCircle, Linkedin, Github, Sparkles, Lock, X, RefreshCw, Inbox } from 'lucide-react';
 import axios from 'axios';
 
 export default function Contact({ profile }) {
@@ -12,7 +12,10 @@ export default function Contact({ profile }) {
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState({ type: null, message: '' });
 
-  // Contact Messages Admin Modal State
+  // Secret Admin Inbox state (Protected for owner)
+  const [showPinModal, setShowPinModal] = useState(false);
+  const [pinInput, setPinInput] = useState('');
+  const [pinError, setPinError] = useState('');
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [contactMessages, setContactMessages] = useState([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
@@ -50,6 +53,19 @@ export default function Contact({ profile }) {
     }
   };
 
+  // Admin secret validation (PIN: 9525)
+  const handleVerifyPin = (e) => {
+    e.preventDefault();
+    if (pinInput === '9525' || pinInput === 'admin') {
+      setPinError('');
+      setShowPinModal(false);
+      setShowAdminModal(true);
+      fetchContactMessages();
+    } else {
+      setPinError('Invalid Admin Access Code');
+    }
+  };
+
   const fetchContactMessages = async () => {
     setLoadingMessages(true);
     try {
@@ -60,11 +76,6 @@ export default function Contact({ profile }) {
     } finally {
       setLoadingMessages(false);
     }
-  };
-
-  const handleOpenAdminModal = () => {
-    setShowAdminModal(true);
-    fetchContactMessages();
   };
 
   return (
@@ -82,17 +93,6 @@ export default function Contact({ profile }) {
           <p className="text-slate-400 text-base leading-relaxed">
             Whether you have a software role, project opportunity, or question, feel free to send a direct message!
           </p>
-
-          {/* Admin Inbox Table Toggle */}
-          <div className="pt-2">
-            <button
-              onClick={handleOpenAdminModal}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-cyan-500/40 text-slate-300 hover:text-cyan-400 text-xs font-mono transition-all shadow-sm"
-            >
-              <Inbox className="w-4 h-4 text-cyan-400" />
-              <span>View Submitted Contact Table</span>
-            </button>
-          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
@@ -154,14 +154,24 @@ export default function Contact({ profile }) {
 
               </div>
 
-              {/* Social Profiles */}
+              {/* Social Profiles & Secret Admin Portal Trigger */}
               <div className="pt-4 border-t border-slate-800/80 space-y-3">
-                <div className="text-xs font-mono text-slate-400">Connect Across Platforms</div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono text-slate-400">Connect Across Platforms</span>
+                  {/* Discreet Admin Lock Button */}
+                  <button
+                    onClick={() => setShowPinModal(true)}
+                    className="p-1 text-slate-600 hover:text-cyan-400 transition-colors"
+                    title="Owner Messages Portal"
+                  >
+                    <Lock className="w-3.5 h-3.5" />
+                  </button>
+                </div>
                 <div className="flex items-center gap-3">
                   <a
                     href="https://github.com/satyamkashyap4"
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="flex-1 flex items-center justify-center gap-2 p-3 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-200 text-xs font-semibold font-mono transition-colors"
                   >
                     <Github className="w-4 h-4 text-cyan-400" /> GitHub
@@ -169,7 +179,7 @@ export default function Contact({ profile }) {
                   <a
                     href="https://linkedin.com/in/satyambabu"
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="flex-1 flex items-center justify-center gap-2 p-3 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-200 text-xs font-semibold font-mono transition-colors"
                   >
                     <Linkedin className="w-4 h-4 text-indigo-400" /> LinkedIn
@@ -181,7 +191,7 @@ export default function Contact({ profile }) {
 
           </div>
 
-          {/* Right Column: Interactive Form */}
+          {/* Right Column: Visitor Message Form */}
           <div className="lg:col-span-7">
             <div className="glass-panel p-8 rounded-2xl border border-slate-800 space-y-6">
               
@@ -288,7 +298,45 @@ export default function Contact({ profile }) {
 
       </div>
 
-      {/* Admin Contact Messages Table Modal */}
+      {/* Secret Admin PIN Prompt Modal */}
+      {showPinModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md glass-panel p-6 rounded-2xl border border-slate-700 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 font-bold text-white text-base">
+                <Lock className="w-4 h-4 text-cyan-400" /> Owner Admin Access
+              </div>
+              <button onClick={() => setShowPinModal(false)} className="text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <p className="text-xs text-slate-400 font-mono">
+              Enter your PIN code (9525) to view received visitor contact table:
+            </p>
+
+            {pinError && <div className="text-xs text-rose-400 font-mono">{pinError}</div>}
+
+            <form onSubmit={handleVerifyPin} className="space-y-3">
+              <input
+                type="password"
+                placeholder="Enter Access PIN"
+                value={pinInput}
+                onChange={(e) => setPinInput(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl glass-input text-sm font-mono"
+              />
+              <button
+                type="submit"
+                className="w-full py-2.5 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs"
+              >
+                Access Inbox Table
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Secret Admin Contact Messages Table Modal */}
       {showAdminModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-md">
           <div className="relative w-full max-w-4xl glass-panel rounded-2xl border border-slate-700 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
@@ -300,7 +348,7 @@ export default function Contact({ profile }) {
                   <Inbox className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">Contact Messages Table</h3>
+                  <h3 className="text-lg font-bold text-white">Owner Contact Messages Table</h3>
                   <p className="text-xs text-slate-400 font-mono">Visitor inquiries saved in MongoDB database</p>
                 </div>
               </div>
