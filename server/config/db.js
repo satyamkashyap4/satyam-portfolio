@@ -9,7 +9,7 @@ const initialProfile = {
   email: "isattu8@gmail.com",
   phone: "+91-6205617146",
   socialLinks: {
-    linkedin: "https://linkedin.com/in/satyambabu",
+    linkedin: "https://www.linkedin.com/in/satyam-kashyap0404",
     github: "https://github.com/satyamkashyap4"
   },
   education: [

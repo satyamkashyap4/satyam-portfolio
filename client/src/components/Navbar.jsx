@@ -6,6 +6,7 @@ export default function Navbar({ activeSection, setActiveSection }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const resumeUrl = "https://drive.google.com/file/d/1C2-GgLrfYBFV6CsNIvDqX3mYvzYR7Qku/view?pli=1";
+  const linkedinUrl = "https://www.linkedin.com/in/satyam-kashyap0404";
 
   const navLinks = [
     { name: 'About', href: '#about' },
@@ -78,7 +79,7 @@ export default function Navbar({ activeSection, setActiveSection }) {
               <Github className="w-5 h-5" />
             </a>
             <a
-              href="https://linkedin.com/in/satyambabu"
+              href={linkedinUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="p-2 text-slate-400 hover:text-white hover:bg-slate-800/80 rounded-lg transition-colors"
@@ -146,7 +147,7 @@ export default function Navbar({ activeSection, setActiveSection }) {
             <a href="https://github.com/satyamkashyap4" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-slate-400 hover:text-cyan-400">
               <Github className="w-5 h-5" /> GitHub
             </a>
-            <a href="https://linkedin.com/in/satyambabu" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-slate-400 hover:text-cyan-400">
+            <a href={linkedinUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-slate-400 hover:text-cyan-400">
               <Linkedin className="w-5 h-5" /> LinkedIn
             </a>
             <a href="mailto:isattu8@gmail.com" className="flex items-center gap-2 text-slate-400 hover:text-cyan-400">

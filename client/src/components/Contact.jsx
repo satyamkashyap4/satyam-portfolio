@@ -20,6 +20,8 @@ export default function Contact({ profile }) {
   const [contactMessages, setContactMessages] = useState([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
 
+  const linkedinUrl = "https://www.linkedin.com/in/satyam-kashyap0404";
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -176,7 +178,7 @@ export default function Contact({ profile }) {
                     <Github className="w-4 h-4 text-cyan-400" /> GitHub
                   </a>
                   <a
-                    href="https://linkedin.com/in/satyambabu"
+                    href={linkedinUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex-1 flex items-center justify-center gap-2 p-3 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-200 text-xs font-semibold font-mono transition-colors"
